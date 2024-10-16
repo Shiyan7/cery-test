@@ -6,10 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check": "next build && next start"
   },
   "dependencies": {
+    "@nextui-org/react": "^2.4.8",
+    "dayjs": "^1.11.13",
+    "framer-motion": "^11.11.9",
     "next": "14.2.1",
+    "next-themes": "^0.3.0",
     "react": "^18",
     "react-dom": "^18"
   },
