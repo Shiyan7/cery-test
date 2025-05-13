@@ -9,26 +9,72 @@ import {
   TableRow,
   Pagination,
   Button,
+  SortDescriptor,
 } from '@nextui-org/react';
 import { TableItem } from '@/types/table';
 import { DateUtil } from '@/utils/date';
+import { useMemo, useState } from 'react';
 
 type Props = {
   items?: TableItem[];
 };
 
+const ROWS_PER_PAGE = 25;
+
 const ItemsTable = ({ items = [] }: Props) => {
+  const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
+    column: 'make',
+    direction: 'ascending',
+  });
+
+  const [page, setPage] = useState(1);
+
+  const sortedItems = useMemo(() => {
+    const { column, direction } = sortDescriptor;
+
+    return [...items].sort((a, b) => {
+      const aVal = a[column as keyof TableItem];
+      const bVal = b[column as keyof TableItem];
+
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return direction === 'ascending' ? aVal - bVal : bVal - aVal;
+      }
+      const aStr = String(aVal).toLowerCase();
+      const bStr = String(bVal).toLowerCase();
+      if (aStr < bStr) return direction === 'ascending' ? -1 : 1;
+      if (aStr > bStr) return direction === 'ascending' ? 1 : -1;
+      return 0;
+    });
+  }, [items, sortDescriptor]);
+
+  const totalPages = Math.ceil(sortedItems.length / ROWS_PER_PAGE);
+
+  const paginatedItems = sortedItems.slice(
+    (page - 1) * ROWS_PER_PAGE,
+    page * ROWS_PER_PAGE
+  );
+
   return (
     <Table
+      isHeaderSticky
+      layout="fixed"
       bottomContent={
         <>
           <div className="flex w-full bg-background justify-between items-center sticky -bottom-4 z-1 p-2 rounded-xl">
             <span className="text-sm">1 - 10 of {items?.length}</span>
-            <Pagination showControls color="default" total={items.length} />
+            <Pagination
+              showControls
+              color="default"
+              total={totalPages}
+              page={page}
+              onChange={setPage}
+            />
           </div>
         </>
       }
       className="flex-[1_1_0] overflow-auto h-full"
+      sortDescriptor={sortDescriptor}
+      onSortChange={setSortDescriptor}
     >
       <TableHeader className="sticky top-0 z-10">
         <TableColumn key="make" allowsSorting>
@@ -50,9 +96,9 @@ const ItemsTable = ({ items = [] }: Props) => {
       <TableBody
         className="overflow-auto"
         emptyContent="No rows to display"
-        items={items}
+        items={paginatedItems}
       >
-        {items?.map((item) => (
+        {(item) => (
           <TableRow
             key={item.unique_id}
             className="hover:bg-content3 hover:cursor-pointer"
@@ -66,7 +112,7 @@ const ItemsTable = ({ items = [] }: Props) => {
               {DateUtil(item.updated_at).format('MM/DD/YYYY HH:mm')}
             </TableCell>
           </TableRow>
-        ))}
+        )}
       </TableBody>
     </Table>
   );
