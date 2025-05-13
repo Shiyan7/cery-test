@@ -39,6 +39,7 @@ const ItemsFilter = ({ items = [] }: Props) => {
       newParams.delete(name);
     }
 
+    newParams.delete('page');
     router.replace(`?${newParams.toString()}`, { scroll: false });
   };
 
