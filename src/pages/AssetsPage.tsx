@@ -5,7 +5,7 @@ import vehicles from '@/mock/mock_vehicles.json';
 export default function AssetsPage() {
   return (
     <div className="flex flex-col gap-4 flex-1">
-      <ItemsFilter />
+      <ItemsFilter items={vehicles} />
       <ItemsTable items={vehicles} />
     </div>
   );
