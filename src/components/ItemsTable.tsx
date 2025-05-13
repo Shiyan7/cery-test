@@ -77,7 +77,7 @@ const ItemsTable = ({ items = [] }: Props) => {
     page * ROWS_PER_PAGE
   );
 
-  const handleSortChange = (descriptor: SortDescriptor) => {
+  const onSortChange = (descriptor: SortDescriptor) => {
     setSortDescriptor(descriptor);
     const newParams = new URLSearchParams(rawParams?.toString());
     newParams.set('sortBy', descriptor.column?.toString() as string);
@@ -85,7 +85,7 @@ const ItemsTable = ({ items = [] }: Props) => {
     router.replace(`?${newParams.toString()}`, { scroll: false });
   };
 
-  const handlePageChange = (newPage: number) => {
+  const onPageChange = (newPage: number) => {
     const newParams = new URLSearchParams(rawParams?.toString());
     if (newPage > 1) {
       newParams.set('page', newPage.toString());
@@ -99,6 +99,7 @@ const ItemsTable = ({ items = [] }: Props) => {
     <Table
       isHeaderSticky
       layout="fixed"
+      aria-label="Table"
       bottomContent={
         <>
           {totalPages > 1 && (
@@ -109,7 +110,7 @@ const ItemsTable = ({ items = [] }: Props) => {
                 color="default"
                 total={totalPages}
                 page={page}
-                onChange={handlePageChange}
+                onChange={onPageChange}
               />
             </div>
           )}
@@ -117,7 +118,7 @@ const ItemsTable = ({ items = [] }: Props) => {
       }
       className="flex-[1_1_0] overflow-auto h-full"
       sortDescriptor={sortDescriptor}
-      onSortChange={handleSortChange}
+      onSortChange={onSortChange}
     >
       <TableHeader className="sticky top-0 z-10">
         <TableColumn key="make" allowsSorting>

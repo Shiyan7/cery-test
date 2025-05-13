@@ -30,7 +30,7 @@ const ItemsFilter = ({ items = [] }: Props) => {
     [items]
   );
 
-  const handleFilterChange = (name: string, value: string | null) => {
+  const onFilterChange = (name: string, value: string | null) => {
     const newParams = new URLSearchParams(rawParams?.toString());
 
     if (value) {
@@ -50,9 +50,7 @@ const ItemsFilter = ({ items = [] }: Props) => {
         label="Make"
         defaultSelectedKey={rawParams?.get('make') || undefined}
         defaultItems={unique.makes}
-        onSelectionChange={(value) =>
-          handleFilterChange('make', value as string)
-        }
+        onSelectionChange={(value) => onFilterChange('make', value as string)}
       >
         {(item) => (
           <AutocompleteItem key={item.value}>{item.value}</AutocompleteItem>
@@ -63,9 +61,7 @@ const ItemsFilter = ({ items = [] }: Props) => {
         label="Model"
         defaultSelectedKey={rawParams?.get('model') || undefined}
         defaultItems={unique.models}
-        onSelectionChange={(value) =>
-          handleFilterChange('model', value as string)
-        }
+        onSelectionChange={(value) => onFilterChange('model', value as string)}
       >
         {(item) => (
           <AutocompleteItem key={item.value}>{item.value}</AutocompleteItem>
@@ -73,7 +69,7 @@ const ItemsFilter = ({ items = [] }: Props) => {
       </Autocomplete>
       <Select
         defaultSelectedKeys={[rawParams?.get('yearFrom') || '']}
-        onChange={(e) => handleFilterChange('yearFrom', e.target.value)}
+        onChange={(e) => onFilterChange('yearFrom', e.target.value)}
         placeholder="Search a year from"
         label="Year From"
       >
@@ -83,7 +79,7 @@ const ItemsFilter = ({ items = [] }: Props) => {
       </Select>
       <Select
         defaultSelectedKeys={[rawParams?.get('yearTo') || '']}
-        onChange={(e) => handleFilterChange('yearTo', e.target.value)}
+        onChange={(e) => onFilterChange('yearTo', e.target.value)}
         placeholder="Search a year to"
         label="Year To"
       >
@@ -97,7 +93,7 @@ const ItemsFilter = ({ items = [] }: Props) => {
         min={0}
         placeholder="Enter mileage from"
         defaultValue={rawParams?.get('mileageFrom') || ''}
-        onChange={(e) => handleFilterChange('mileageFrom', e.target.value)}
+        onChange={(e) => onFilterChange('mileageFrom', e.target.value)}
       />
       <Input
         label="Mileage To"
@@ -105,7 +101,7 @@ const ItemsFilter = ({ items = [] }: Props) => {
         min={0}
         placeholder="Enter mileage to"
         defaultValue={rawParams?.get('mileageTo') || ''}
-        onChange={(e) => handleFilterChange('mileageTo', e.target.value)}
+        onChange={(e) => onFilterChange('mileageTo', e.target.value)}
       />
     </div>
   );
