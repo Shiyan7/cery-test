@@ -8,35 +8,29 @@ import {
   TableHeader,
   TableRow,
   Pagination,
-  SortDescriptor,
 } from '@nextui-org/react';
 import { TableItem } from '@/types/table';
 import { DateUtil } from '@/utils/date';
-import { useMemo, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { exactMatch, inRange } from '@/utils/filters';
+import { usePagination } from '@/hooks/usePagination';
+import { useSortedItems } from '@/hooks/useSortedItems';
 
 type Props = {
   items?: TableItem[];
 };
 
-const ROWS_PER_PAGE = 25;
+const TABLE_COLUMNS = [
+  { key: 'make', label: 'Make' },
+  { key: 'model', label: 'Model' },
+  { key: 'mileage', label: 'Mileage' },
+  { key: 'year', label: 'Year' },
+  { key: 'date_of_update', label: 'Last Update' },
+];
 
 const ItemsTable = ({ items = [] }: Props) => {
-  const router = useRouter();
-
   const rawParams = useSearchParams();
-
-  const urlSort = rawParams?.get('sortBy');
-  const urlOrder = rawParams?.get('sortOrder');
-  const urlPage = rawParams?.get('page');
-
-  const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
-    column: urlSort || 'make',
-    direction: (urlOrder as SortDescriptor['direction']) || 'ascending',
-  });
-
-  const page = urlPage ? parseInt(urlPage) : 1;
 
   const filteredItems = useMemo(() => {
     const params = Object.fromEntries(rawParams ? rawParams.entries() : []);
@@ -52,48 +46,9 @@ const ItemsTable = ({ items = [] }: Props) => {
     );
   }, [items, rawParams]);
 
-  const sortedItems = useMemo(() => {
-    const { column, direction } = sortDescriptor;
+  const { sortDescriptor, onSortChange, sortedItems } = useSortedItems(filteredItems);
 
-    return [...filteredItems].sort((a, b) => {
-      const aVal = a[column as keyof TableItem];
-      const bVal = b[column as keyof TableItem];
-
-      if (typeof aVal === 'number' && typeof bVal === 'number') {
-        return direction === 'ascending' ? aVal - bVal : bVal - aVal;
-      }
-      const aStr = String(aVal).toLowerCase();
-      const bStr = String(bVal).toLowerCase();
-      if (aStr < bStr) return direction === 'ascending' ? -1 : 1;
-      if (aStr > bStr) return direction === 'ascending' ? 1 : -1;
-      return 0;
-    });
-  }, [filteredItems, sortDescriptor]);
-
-  const totalPages = Math.ceil(sortedItems.length / ROWS_PER_PAGE);
-
-  const paginatedItems = sortedItems.slice(
-    (page - 1) * ROWS_PER_PAGE,
-    page * ROWS_PER_PAGE
-  );
-
-  const onSortChange = (descriptor: SortDescriptor) => {
-    setSortDescriptor(descriptor);
-    const newParams = new URLSearchParams(rawParams?.toString());
-    newParams.set('sortBy', descriptor.column?.toString() as string);
-    newParams.set('sortOrder', descriptor.direction as string);
-    router.replace(`?${newParams.toString()}`, { scroll: false });
-  };
-
-  const onPageChange = (newPage: number) => {
-    const newParams = new URLSearchParams(rawParams?.toString());
-    if (newPage > 1) {
-      newParams.set('page', newPage.toString());
-    } else {
-      newParams.delete('page');
-    }
-    router.replace(`?${newParams.toString()}`, { scroll: false });
-  };
+  const { page, totalPages, paginatedItems, onPageChange } = usePagination(sortedItems);
 
   return (
     <Table
@@ -121,21 +76,17 @@ const ItemsTable = ({ items = [] }: Props) => {
       onSortChange={onSortChange}
     >
       <TableHeader className="sticky top-0 z-10">
-        <TableColumn key="make" allowsSorting>
-          Make
-        </TableColumn>
-        <TableColumn key="model" allowsSorting>
-          Model
-        </TableColumn>
-        <TableColumn key="mileage" allowsSorting className="text-right">
-          Mileage
-        </TableColumn>
-        <TableColumn key="year" allowsSorting className="text-right">
-          Year
-        </TableColumn>
-        <TableColumn key="date_of_update" allowsSorting>
-          Last Update
-        </TableColumn>
+        {TABLE_COLUMNS.map((column) => (
+          <TableColumn
+            key={column.key}
+            allowsSorting
+            className={
+              ['mileage', 'year'].includes(column.key) ? 'text-right' : ''
+            }
+          >
+            {column.label}
+          </TableColumn>
+        ))}
       </TableHeader>
       <TableBody
         className="overflow-auto"
